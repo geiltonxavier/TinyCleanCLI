@@ -23,6 +23,7 @@ type Options struct {
 	IncludeCaches   bool
 	InactiveDays    int
 	ProjectPaths    []string
+	Verbose         bool
 }
 
 type stringSlice []string
@@ -87,6 +88,7 @@ func runScan(args []string) error {
 	fs.BoolVar(&opts.IncludeProjects, "projects", true, "include inactive projects detection")
 	fs.BoolVar(&opts.IncludeCaches, "caches", true, "include system cache and logs cleanup")
 	fs.IntVar(&opts.InactiveDays, "days", 30, "consider items inactive after this many days")
+	fs.BoolVar(&opts.Verbose, "verbose", false, "show full lists instead of abbreviated output")
 	fs.Var(&projectRoots, "projects-path", "path to search for projects (repeatable)")
 	fs.SetOutput(os.Stdout)
 
@@ -128,7 +130,15 @@ func runScan(args []string) error {
 		}
 	}
 
-	report.PrintResults(results, opts.DryRun, time.Now())
+	report.PrintResults(results, report.Options{
+		DryRun:          opts.DryRun,
+		Verbose:         opts.Verbose,
+		InactiveDays:    opts.InactiveDays,
+		IncludeApps:     opts.IncludeApps,
+		IncludeCaches:   opts.IncludeCaches,
+		IncludeProjects: opts.IncludeProjects,
+		GeneratedAt:     time.Now(),
+	})
 	return nil
 }
 
